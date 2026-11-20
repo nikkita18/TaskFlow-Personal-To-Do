@@ -1,106 +1,347 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <meta name="description" content="Personal To-Do and Task Tracker with Secure Token Authentication">
-  <meta name="theme-color" content="#1e1e24">
+  <meta name="description" content="Loopa - Postmodern Task Tracker. Ship work that actually gets done.">
+  <meta name="theme-color" content="#ffc531">
   <link rel="manifest" href="/manifest.json">
-  <title>TaskFlow — Personal Task Tracker</title>
+  <title>Loopa — Ship work that actually gets done.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
-<body>
-  <!-- Global Toast Notification Container -->
+<body class="memphis-body">
+  <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- AUTHENTICATION VIEW -->
-  <div id="auth-view" class="view auth-view">
-    <div class="auth-card">
-      <header class="auth-header">
-        <div class="brand-logo" aria-hidden="true">✓</div>
-        <h1 class="brand-title">TaskFlow</h1>
-        <p class="brand-subtitle">Streamlined personal task management</p>
-      </header>
+  <!-- ========================================================
+       TOP NAVIGATION
+       ======================================================== -->
+  <header class="top-nav">
+    <div class="nav-container">
+      <!-- Left: Logo Tile + Wordmark -->
+      <a href="#hero" class="brand-link" aria-label="Loopa Home">
+        <div class="logo-tile">
+          <!-- Squiggle glyph -->
+          <svg class="logo-glyph" viewBox="0 0 24 24" fill="none" stroke="#17140d" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 13c3-5 5-5 8 0s5 5 8 0" />
+          </svg>
+        </div>
+        <span class="brand-wordmark">Loopa</span>
+      </a>
 
-      <!-- Auth Tabs: Login vs Register -->
-      <div class="tab-group" role="tablist" aria-label="Authentication Options">
-        <button type="button" id="tab-login" class="tab-btn active" role="tab" aria-selected="true" aria-controls="login-form">Sign In</button>
-        <button type="button" id="tab-register" class="tab-btn" role="tab" aria-selected="false" aria-controls="register-form">Create Account</button>
+      <!-- Center: Navigation Links -->
+      <nav class="nav-links" aria-label="Main Navigation">
+        <a href="#features" class="nav-link">Product</a>
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#pricing" class="nav-link">Pricing</a>
+        <a href="#demo" class="nav-link">Docs</a>
+      </nav>
+
+      <!-- Right: Actions -->
+      <div class="nav-actions">
+        <!-- Logged-out state -->
+        <div id="nav-auth-guest" class="nav-auth-group">
+          <button type="button" id="btn-nav-signin" class="nav-btn-link">Sign In</button>
+          <button type="button" id="btn-nav-start" class="btn-pill btn-pill-teal">Start free</button>
+        </div>
+
+        <!-- Logged-in state -->
+        <div id="nav-auth-user" class="nav-auth-group hidden">
+          <button type="button" id="btn-nav-dashboard" class="btn-pill btn-pill-mustard">My Tasks (<span id="nav-user-name">User</span>)</button>
+          <button type="button" id="btn-nav-logout" class="nav-btn-link">Logout</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================
+       LANDING PAGE CONTAINER (HERO, LOGO STRIP, FEATURES)
+       ======================================================== -->
+  <div id="landing-view" class="landing-view">
+    <!-- ==================== HERO SECTION ==================== -->
+    <section id="hero" class="hero-section">
+      <!-- ANIMATED MEMPHIS CONFETTI BACKGROUND (Pure CSS Keyframes - NO JS) -->
+      <div class="confetti-field" aria-hidden="true">
+        <!-- 1. Coral Triangle -->
+        <svg class="confetti-item shape-triangle" viewBox="0 0 44 44">
+          <polygon points="22,4 40,38 4,38" fill="#ff5b57" stroke="#17140d" stroke-width="3.5" stroke-linejoin="round" />
+        </svg>
+
+        <!-- 2. Teal Quarter-Arc -->
+        <svg class="confetti-item shape-quarter-arc" viewBox="0 0 48 48">
+          <path d="M6 6 A36 36 0 0 1 42 42 L6 42 Z" fill="#12b3a4" stroke="#17140d" stroke-width="3.5" stroke-linejoin="round" />
+        </svg>
+
+        <!-- 3. Mustard Dotted Circle -->
+        <svg class="confetti-item shape-dotted-circle" viewBox="0 0 54 54">
+          <circle cx="27" cy="27" r="23" fill="none" stroke="#ffc531" stroke-width="4.5" stroke-dasharray="2 7" stroke-linecap="round" />
+        </svg>
+
+        <!-- 4. Violet Plus-Sign (Spinning) -->
+        <svg class="confetti-item shape-plus" viewBox="0 0 42 42">
+          <path d="M16 4 H26 V16 H38 V26 H26 V38 H16 V26 H4 V16 H16 Z" fill="#6b5be6" stroke="#17140d" stroke-width="3.5" stroke-linejoin="round" />
+        </svg>
+
+        <!-- 5. Black Squiggle 'Bacteria' Line (Swaying) -->
+        <svg class="confetti-item shape-bacteria" viewBox="0 0 70 32">
+          <path d="M4 16 Q 18 2 35 16 T 66 16" fill="none" stroke="#17140d" stroke-width="4.5" stroke-linecap="round" />
+        </svg>
+
+        <!-- 6. Mustard Half-Circle (Bobbing) -->
+        <svg class="confetti-item shape-half-circle" viewBox="0 0 50 30">
+          <path d="M4 26 A21 21 0 0 1 46 26 Z" fill="#ffc531" stroke="#17140d" stroke-width="3.5" stroke-linejoin="round" />
+        </svg>
+
+        <!-- 7. Small Solid Teal Dot (Pulsing) -->
+        <svg class="confetti-item shape-teal-dot" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" fill="#12b3a4" stroke="#17140d" stroke-width="3" />
+        </svg>
+
+        <!-- 8. Sky-Blue Zigzag -->
+        <svg class="confetti-item shape-zigzag" viewBox="0 0 64 28">
+          <polyline points="4,22 18,6 32,22 46,6 60,22" fill="none" stroke="#3aa0ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+
+        <!-- 9. Coral Striped / Terrazzo Circle (Spinning) -->
+        <svg class="confetti-item shape-striped-circle" viewBox="0 0 52 52">
+          <defs>
+            <pattern id="terrazzo-stripes" width="8" height="8" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#17140d" stroke-width="3.5" />
+            </pattern>
+          </defs>
+          <circle cx="26" cy="26" r="22" fill="#ff5b57" stroke="#17140d" stroke-width="3.5" />
+          <circle cx="26" cy="26" r="22" fill="url(#terrazzo-stripes)" />
+        </svg>
       </div>
 
-      <!-- Auth Alert Banner -->
-      <div id="auth-alert" class="alert-box hidden" role="alert"></div>
-
-      <!-- Sign In Form -->
-      <form id="login-form" class="auth-form" novalidate>
-        <div class="form-group">
-          <label for="login-email">Email Address</label>
-          <input type="email" id="login-email" name="email" required autocomplete="email" placeholder="name@example.com" class="form-input">
-          <span class="field-error" id="login-email-error"></span>
-        </div>
-
-        <div class="form-group">
-          <label for="login-password">Password</label>
-          <div class="password-wrapper">
-            <input type="password" id="login-password" name="password" required autocomplete="current-password" placeholder="••••••••" class="form-input">
-            <button type="button" class="btn-toggle-pw" aria-label="Toggle password visibility" data-target="login-password">👁</button>
+      <div class="hero-layout">
+        <!-- LEFT COLUMN: COPY + CTAs + TRUST -->
+        <div class="hero-left">
+          <!-- Eyebrow Pill -->
+          <div class="eyebrow-pill eyebrow-violet">
+            <span class="dot dot-mustard" aria-hidden="true"></span>
+            <span>NEW • Team plans just dropped</span>
           </div>
-          <span class="field-error" id="login-password-error"></span>
-        </div>
 
-        <button type="submit" id="btn-login-submit" class="btn btn-primary btn-block">
-          <span class="btn-text">Sign In</span>
-          <span class="spinner hidden" aria-hidden="true"></span>
-        </button>
-      </form>
+          <!-- Main Display Headline with Marker Highlights -->
+          <h1 class="hero-headline">
+            Ship work that <span class="marker marker-mustard">actually</span> gets <span class="marker marker-teal">done.</span>
+          </h1>
 
-      <!-- Register Form -->
-      <form id="register-form" class="auth-form hidden" novalidate>
-        <div class="form-group">
-          <label for="reg-name">Full Name <span class="text-muted">(Optional)</span></label>
-          <input type="text" id="reg-name" name="name" maxlength="80" autocomplete="name" placeholder="John Doe" class="form-input">
-          <span class="field-error" id="reg-name-error"></span>
-        </div>
+          <!-- Lead Paragraph -->
+          <p class="hero-lead">
+            No endless status checks. No meetings about meetings. Loopa gives high-velocity squads a punchy, tactile task board that keeps momentum loud and clear.
+          </p>
 
-        <div class="form-group">
-          <label for="reg-email">Email Address</label>
-          <input type="email" id="reg-email" name="email" required autocomplete="email" placeholder="name@example.com" class="form-input">
-          <span class="field-error" id="reg-email-error"></span>
-        </div>
-
-        <div class="form-group">
-          <label for="reg-password">Password</label>
-          <div class="password-wrapper">
-            <input type="password" id="reg-password" name="password" required autocomplete="new-password" placeholder="At least 8 chars with 1 letter & 1 digit" class="form-input">
-            <button type="button" class="btn-toggle-pw" aria-label="Toggle password visibility" data-target="reg-password">👁</button>
+          <!-- Dual Tactile CTA Row -->
+          <div class="hero-cta-row">
+            <button type="button" id="btn-hero-primary" class="btn-pill btn-pill-lg btn-pill-coral">
+              Start free -&gt;
+            </button>
+            <button type="button" id="btn-hero-secondary" class="btn-pill btn-pill-lg btn-pill-ghost">
+              Watch the demo
+            </button>
           </div>
-          <small class="form-hint">8–128 characters, with at least one letter and one number.</small>
-          <span class="field-error" id="reg-password-error"></span>
+
+          <!-- Trust Row -->
+          <div class="trust-row">
+            <div class="avatar-stack" aria-hidden="true">
+              <div class="avatar avatar-coral">A</div>
+              <div class="avatar avatar-teal">B</div>
+              <div class="avatar avatar-violet">C</div>
+              <div class="avatar avatar-mustard">D</div>
+            </div>
+            <p class="trust-text">
+              <strong>12,000+ teams</strong> plan their week in Loopa.<br>
+              <span class="trust-sub">No credit card, no meetings about meetings.</span>
+            </p>
+          </div>
         </div>
 
-        <button type="submit" id="btn-register-submit" class="btn btn-primary btn-block">
-          <span class="btn-text">Create Account</span>
-          <span class="spinner hidden" aria-hidden="true"></span>
-        </button>
-      </form>
-    </div>
+        <!-- RIGHT COLUMN: TILTED PRODUCT DASHBOARD MOCKUP -->
+        <div class="hero-right">
+          <div class="dashboard-mockup">
+            <!-- Browser Chrome Top Bar -->
+            <div class="mockup-chrome">
+              <div class="chrome-dots" aria-hidden="true">
+                <span class="dot dot-coral"></span>
+                <span class="dot dot-mustard"></span>
+                <span class="dot dot-teal"></span>
+              </div>
+              <div class="chrome-title-bar">
+                <span>This week • Design squad</span>
+              </div>
+            </div>
+
+            <!-- Mockup Body -->
+            <div class="mockup-body">
+              <!-- Velocity Header -->
+              <div class="mockup-header-row">
+                <h3 class="mockup-section-title">Sprint velocity</h3>
+                <span class="pill-stat pill-teal">+38% up</span>
+              </div>
+
+              <!-- 6-Bar Velocity Chart -->
+              <div class="chart-panel" aria-label="Velocity chart">
+                <div class="chart-bars">
+                  <div class="bar-col">
+                    <div class="bar-fill bar-mustard" style="height: 44%;"></div>
+                    <span class="bar-label">M</span>
+                  </div>
+                  <div class="bar-col">
+                    <div class="bar-fill bar-coral" style="height: 62%;"></div>
+                    <span class="bar-label">T</span>
+                  </div>
+                  <div class="bar-col">
+                    <div class="bar-fill bar-violet" style="height: 52%;"></div>
+                    <span class="bar-label">W</span>
+                  </div>
+                  <div class="bar-col">
+                    <div class="bar-fill bar-teal" style="height: 82%;"></div>
+                    <span class="bar-label">T</span>
+                  </div>
+                  <div class="bar-col">
+                    <div class="bar-fill bar-sky" style="height: 70%;"></div>
+                    <span class="bar-label">F</span>
+                  </div>
+                  <div class="bar-col">
+                    <div class="bar-fill bar-coral" style="height: 96%;"></div>
+                    <span class="bar-label">S</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3-Item Checklist -->
+              <div class="mockup-checklist" aria-label="Squad checklist">
+                <div class="checklist-item checked">
+                  <div class="check-box checked">✓</div>
+                  <span class="check-text">Ship the new onboarding flow</span>
+                  <span class="badge badge-priority-high">High</span>
+                </div>
+                <div class="checklist-item checked">
+                  <div class="check-box checked">✓</div>
+                  <span class="check-text">Review Q3 roadmap draft</span>
+                  <span class="badge badge-priority-medium">Med</span>
+                </div>
+                <div class="checklist-item">
+                  <div class="check-box"></div>
+                  <span class="check-text">Sync with the growth pod</span>
+                  <span class="badge badge-priority-low">Low</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== LOGO STRIP ==================== -->
+    <section class="logo-strip">
+      <div class="logo-strip-inner">
+        <span class="strip-label">TRUSTED BY TEAMS AT</span>
+        <div class="strip-logos">
+          <span class="logo-wordmark">Northwind</span>
+          <span class="logo-wordmark">Fig&amp;Co</span>
+          <span class="logo-wordmark">Superbloom</span>
+          <span class="logo-wordmark">Kettle</span>
+          <span class="logo-wordmark">Halcyon</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== FEATURES SECTION ==================== -->
+    <section id="features" class="features-section">
+      <div class="features-container">
+        <!-- Eyebrow + Heading -->
+        <div class="features-header">
+          <div class="eyebrow-pill eyebrow-violet">
+            <span>WHY TEAMS SWITCH</span>
+          </div>
+          <h2 class="features-title">
+            Boring tools kill momentum.<br>
+            Loopa keeps it loud.
+          </h2>
+        </div>
+
+        <!-- Three-Up Card Row -->
+        <div class="feature-cards-grid">
+          <!-- Card 1: Coral -->
+          <div class="feature-card">
+            <div class="icon-chip chip-coral" aria-hidden="true">⚡</div>
+            <h3 class="feature-card-title">Plans that flow</h3>
+            <p class="feature-card-desc">
+              Drop tasks into place in seconds. Tag priorities, attach due dates, and filter lightning-fast with instant debounce search.
+            </p>
+            <div class="card-corner-accent accent-coral" aria-hidden="true"></div>
+          </div>
+
+          <!-- Card 2: Teal -->
+          <div class="feature-card">
+            <div class="icon-chip chip-teal" aria-hidden="true">📊</div>
+            <h3 class="feature-card-title">Progress you can see</h3>
+            <p class="feature-card-desc">
+              Visual overdue banners, custom sorting orders, and clean status tags. No guesswork, just clear tactile updates.
+            </p>
+            <div class="card-corner-accent accent-teal" aria-hidden="true"></div>
+          </div>
+
+          <!-- Card 3: Violet -->
+          <div class="feature-card">
+            <div class="icon-chip chip-violet" aria-hidden="true">🛡️</div>
+            <h3 class="feature-card-title">Built for the crew</h3>
+            <p class="feature-card-desc">
+              Salted PBKDF2 cryptography with 100,000 iterations, Bearer session tokens, and strict ownership isolation.
+            </p>
+            <div class="card-corner-accent accent-violet" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== BOTTOM CTA BANNER ==================== -->
+    <section class="bottom-cta-section" id="pricing">
+      <div class="bottom-cta-card">
+        <h2 class="bottom-cta-title">Ready to keep your work loud?</h2>
+        <p class="bottom-cta-sub">Join thousands of engineers and designers building with pure momentum.</p>
+        <button type="button" id="btn-bottom-start" class="btn-pill btn-pill-lg btn-pill-coral">Start free now -&gt;</button>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <span class="logo-tile small">
+            <svg class="logo-glyph" viewBox="0 0 24 24" fill="none" stroke="#17140d" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 13c3-5 5-5 8 0s5 5 8 0" />
+            </svg>
+          </span>
+          <span class="brand-wordmark">Loopa</span>
+        </div>
+        <p class="footer-copy">© 2026 Loopa TaskFlow. Built for CN Club Recruitment. Standard library + Flask + SQLite.</p>
+      </div>
+    </footer>
   </div>
 
-  <!-- APPLICATION MAIN VIEW (DASHBOARD) -->
-  <div id="app-view" class="view app-view hidden">
-    <!-- Top Navigation Header -->
-    <header class="app-navbar">
-      <div class="nav-left">
-        <span class="nav-logo" aria-hidden="true">✓</span>
-        <span class="nav-title">TaskFlow</span>
-      </div>
-      <div class="nav-right">
-        <button type="button" id="btn-theme-toggle" class="btn-icon" aria-label="Toggle color theme" title="Toggle theme">🌙</button>
-        <div class="user-menu-wrapper">
-          <span id="user-display" class="user-display">Loading...</span>
+  <!-- ========================================================
+       APPLICATION DASHBOARD (LOGGED IN TASK MANAGEMENT)
+       ======================================================== -->
+  <div id="app-view" class="app-view hidden">
+    <!-- Top Action Banner -->
+    <header class="dashboard-header">
+      <div class="dashboard-nav-container">
+        <div class="dash-left">
+          <button type="button" id="btn-back-to-landing" class="btn-pill btn-pill-sm btn-pill-ghost" title="Back to main page">← Home</button>
+          <h2 class="dash-title">My Workspace</h2>
         </div>
-        <button type="button" id="btn-open-change-pw" class="btn btn-outline btn-sm">Password</button>
-        <button type="button" id="btn-logout" class="btn btn-danger-outline btn-sm">Logout</button>
+        <div class="dash-right">
+          <span id="user-display" class="user-badge">Loading...</span>
+          <button type="button" id="btn-open-change-pw" class="btn-pill btn-pill-sm btn-pill-ghost">Password</button>
+          <button type="button" id="btn-logout" class="btn-pill btn-pill-sm btn-pill-coral">Logout</button>
+        </div>
       </div>
     </header>
 
@@ -108,7 +349,7 @@
     <main class="app-container">
       <!-- Quick Action / Add Task Bar -->
       <section class="action-bar" aria-label="Task Management Bar">
-        <button type="button" id="btn-open-add-task" class="btn btn-primary">
+        <button type="button" id="btn-open-add-task" class="btn-pill btn-pill-coral">
           <span class="icon" aria-hidden="true">+</span> New Task
         </button>
         <div class="search-box">
@@ -153,14 +394,13 @@
       <!-- Stats Summary Banner -->
       <div id="stats-banner" class="stats-banner" aria-label="Task summary statistics">
         <span id="stat-total" class="stat-pill">Total: 0</span>
-        <span id="stat-open" class="stat-pill">Open: 0</span>
-        <span id="stat-done" class="stat-pill">Completed: 0</span>
+        <span id="stat-open" class="stat-pill stat-open">Open: 0</span>
+        <span id="stat-done" class="stat-pill stat-done">Completed: 0</span>
         <span id="stat-overdue" class="stat-pill overdue hidden">Overdue: 0</span>
       </div>
 
       <!-- Task List Container -->
       <section id="tasks-container" class="tasks-container" aria-label="List of tasks">
-        <!-- Dynamic task cards rendered by app.js -->
         <div id="loading-state" class="state-placeholder">
           <div class="spinner large" aria-hidden="true"></div>
           <p>Loading your tasks...</p>
@@ -168,20 +408,110 @@
         <div id="empty-state" class="state-placeholder hidden">
           <div class="empty-icon" aria-hidden="true">📝</div>
           <h3>No tasks found</h3>
-          <p class="text-muted">Create a new task or adjust your filters above.</p>
+          <p class="text-muted">Create a new task above or try a different filter.</p>
         </div>
         <div id="error-state" class="state-placeholder hidden">
           <div class="error-icon" aria-hidden="true">⚠️</div>
           <h3>Unable to load tasks</h3>
           <p id="error-message" class="text-danger"></p>
-          <button type="button" id="btn-retry-tasks" class="btn btn-outline">Retry</button>
+          <button type="button" id="btn-retry-tasks" class="btn-pill btn-pill-sm btn-pill-mustard">Retry</button>
         </div>
         <ul id="task-list" class="task-list" role="list"></ul>
       </section>
     </main>
   </div>
 
-  <!-- MODAL: ADD / EDIT TASK -->
+  <!-- ========================================================
+       MODAL 1: AUTHENTICATION (SIGN IN / REGISTER)
+       ======================================================== -->
+  <div id="auth-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+    <div class="modal-card auth-modal-card">
+      <header class="modal-header">
+        <div class="auth-modal-brand">
+          <div class="logo-tile small">
+            <svg class="logo-glyph" viewBox="0 0 24 24" fill="none" stroke="#17140d" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 13c3-5 5-5 8 0s5 5 8 0" />
+            </svg>
+          </div>
+          <h2 id="auth-modal-title">Welcome to Loopa</h2>
+        </div>
+        <button type="button" class="btn-close-auth-modal" aria-label="Close dialog">&times;</button>
+      </header>
+
+      <!-- Auth Tabs: Login vs Register -->
+      <div class="tab-group" role="tablist" aria-label="Authentication Options">
+        <button type="button" id="tab-login" class="tab-btn active" role="tab" aria-selected="true" aria-controls="login-form">Sign In</button>
+        <button type="button" id="tab-register" class="tab-btn" role="tab" aria-selected="false" aria-controls="register-form">Create Account</button>
+      </div>
+
+      <!-- Quick Demo Login Button for Interviewers / Evaluators -->
+      <div class="demo-login-box">
+        <button type="button" id="btn-quick-demo" class="btn-quick-demo">
+          ⚡ 1-Click Demo Login (demo@taskflow.dev)
+        </button>
+      </div>
+
+      <!-- Auth Alert Banner -->
+      <div id="auth-alert" class="alert-box hidden" role="alert"></div>
+
+      <!-- Sign In Form -->
+      <form id="login-form" class="auth-form" novalidate>
+        <div class="form-group">
+          <label for="login-email">Email Address</label>
+          <input type="email" id="login-email" name="email" required autocomplete="email" placeholder="name@example.com" class="form-input">
+          <span class="field-error" id="login-email-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <div class="password-wrapper">
+            <input type="password" id="login-password" name="password" required autocomplete="current-password" placeholder="••••••••" class="form-input">
+            <button type="button" class="btn-toggle-pw" aria-label="Toggle password visibility" data-target="login-password">👁</button>
+          </div>
+          <span class="field-error" id="login-password-error"></span>
+        </div>
+
+        <button type="submit" id="btn-login-submit" class="btn-pill btn-pill-coral btn-block">
+          <span class="btn-text">Sign In</span>
+          <span class="spinner hidden" aria-hidden="true"></span>
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="register-form" class="auth-form hidden" novalidate>
+        <div class="form-group">
+          <label for="reg-name">Full Name <span class="text-muted">(Optional)</span></label>
+          <input type="text" id="reg-name" name="name" maxlength="80" autocomplete="name" placeholder="Asha Sharma" class="form-input">
+          <span class="field-error" id="reg-name-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-email">Email Address</label>
+          <input type="email" id="reg-email" name="email" required autocomplete="email" placeholder="name@example.com" class="form-input">
+          <span class="field-error" id="reg-email-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-password">Password</label>
+          <div class="password-wrapper">
+            <input type="password" id="reg-password" name="password" required autocomplete="new-password" placeholder="At least 8 chars with 1 letter & 1 digit" class="form-input">
+            <button type="button" class="btn-toggle-pw" aria-label="Toggle password visibility" data-target="reg-password">👁</button>
+          </div>
+          <small class="form-hint">8–128 characters, with at least one letter and one number.</small>
+          <span class="field-error" id="reg-password-error"></span>
+        </div>
+
+        <button type="submit" id="btn-register-submit" class="btn-pill btn-pill-coral btn-block">
+          <span class="btn-text">Create Account</span>
+          <span class="spinner hidden" aria-hidden="true"></span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 2: ADD / EDIT TASK
+       ======================================================== -->
   <div id="task-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-task-title">
     <div class="modal-card">
       <header class="modal-header">
@@ -222,8 +552,8 @@
         </div>
 
         <div class="modal-actions">
-          <button type="button" class="btn btn-outline btn-close-modal">Cancel</button>
-          <button type="submit" id="btn-save-task" class="btn btn-primary">
+          <button type="button" class="btn-pill btn-pill-sm btn-pill-ghost btn-close-modal">Cancel</button>
+          <button type="submit" id="btn-save-task" class="btn-pill btn-pill-sm btn-pill-coral">
             <span class="btn-text">Save Task</span>
             <span class="spinner hidden" aria-hidden="true"></span>
           </button>
@@ -232,7 +562,9 @@
     </div>
   </div>
 
-  <!-- MODAL: CONFIRM DELETE -->
+  <!-- ========================================================
+       MODAL 3: CONFIRM DELETE
+       ======================================================== -->
   <div id="delete-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
     <div class="modal-card modal-sm">
       <header class="modal-header">
@@ -244,13 +576,15 @@
         <p><strong id="delete-task-title-preview" class="text-truncate"></strong></p>
       </div>
       <div class="modal-actions">
-        <button type="button" class="btn btn-outline btn-close-delete-modal">Cancel</button>
-        <button type="button" id="btn-confirm-delete" class="btn btn-danger">Delete</button>
+        <button type="button" class="btn-pill btn-pill-sm btn-pill-ghost btn-close-delete-modal">Cancel</button>
+        <button type="button" id="btn-confirm-delete" class="btn-pill btn-pill-sm btn-pill-coral">Delete</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: CHANGE PASSWORD -->
+  <!-- ========================================================
+       MODAL 4: CHANGE PASSWORD
+       ======================================================== -->
   <div id="pw-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pw-modal-title">
     <div class="modal-card modal-sm">
       <header class="modal-header">
@@ -269,8 +603,8 @@
           <span class="field-error" id="new-pw-error"></span>
         </div>
         <div class="modal-actions">
-          <button type="button" class="btn btn-outline btn-close-pw-modal">Cancel</button>
-          <button type="submit" id="btn-submit-change-pw" class="btn btn-primary">Update Password</button>
+          <button type="button" class="btn-pill btn-pill-sm btn-pill-ghost btn-close-pw-modal">Cancel</button>
+          <button type="submit" id="btn-submit-change-pw" class="btn-pill btn-pill-sm btn-pill-coral">Update</button>
         </div>
       </form>
     </div>

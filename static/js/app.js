@@ -1,25 +1,43 @@
 /**
- * TaskFlow Application Controller & DOM Renderer
+ * Loopa / TaskFlow Application Controller
+ * Handles Memphis Landing Page navigation, Auth Modal, and Task Workspace.
  * 100% Vanilla ES2020+, XSS-safe (DOM createElement + textContent), Accessible.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-  // DOM Elements - Views
-  const authView = document.getElementById("auth-view");
+  // Views & Containers
+  const landingView = document.getElementById("landing-view");
   const appView = document.getElementById("app-view");
   const toastContainer = document.getElementById("toast-container");
 
-  // Auth Elements
+  // Nav Elements
+  const navAuthGuest = document.getElementById("nav-auth-guest");
+  const navAuthUser = document.getElementById("nav-auth-user");
+  const navUserName = document.getElementById("nav-user-name");
+  const btnNavSignin = document.getElementById("btn-nav-signin");
+  const btnNavStart = document.getElementById("btn-nav-start");
+  const btnNavDashboard = document.getElementById("btn-nav-dashboard");
+  const btnNavLogout = document.getElementById("btn-nav-logout");
+  const btnBackToLanding = document.getElementById("btn-back-to-landing");
+
+  // Hero & Landing Action Buttons
+  const btnHeroPrimary = document.getElementById("btn-hero-primary");
+  const btnHeroSecondary = document.getElementById("btn-hero-secondary");
+  const btnBottomStart = document.getElementById("btn-bottom-start");
+
+  // Auth Modal Elements
+  const authModal = document.getElementById("auth-modal");
   const tabLogin = document.getElementById("tab-login");
   const tabRegister = document.getElementById("tab-register");
   const loginForm = document.getElementById("login-form");
   const registerForm = document.getElementById("register-form");
   const authAlert = document.getElementById("auth-alert");
+  const btnQuickDemo = document.getElementById("btn-quick-demo");
+  const btnCloseAuthModal = document.querySelector(".btn-close-auth-modal");
+
+  // Workspace / Task View Elements
   const userDisplay = document.getElementById("user-display");
   const btnLogout = document.getElementById("btn-logout");
-  const btnThemeToggle = document.getElementById("btn-theme-toggle");
-
-  // Task View Elements
   const btnOpenAddTask = document.getElementById("btn-open-add-task");
   const searchInput = document.getElementById("search-input");
   const filterChips = document.querySelectorAll(".filter-chip");
@@ -62,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const newPwInput = document.getElementById("new-pw");
 
   // ----------------------------------------------------
-  // Helper: Toast Notifications
+  // Toast Notifications (Memphis Tactile)
   // ----------------------------------------------------
   function showToast(message, type = "info", duration = 3500) {
     const toast = document.createElement("div");
@@ -78,28 +96,31 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       toast.style.opacity = "0";
       toast.style.transform = "translateY(-10px)";
-      toast.style.transition = "all 0.3s ease";
-      setTimeout(() => toast.remove(), 300);
+      toast.style.transition = "all 0.25s ease";
+      setTimeout(() => toast.remove(), 250);
     }, duration);
   }
 
   // ----------------------------------------------------
-  // Helper: Theme Controller
+  // Auth Modal Management
   // ----------------------------------------------------
-  function applyTheme(theme) {
-    AppState.setTheme(theme);
-    btnThemeToggle.textContent = theme === "dark" ? "🌙" : "☀️";
+  function openAuthModal(isRegister = false) {
+    switchAuthTab(isRegister);
+    authModal.classList.remove("hidden");
+    const inputToFocus = isRegister
+      ? document.getElementById("reg-email")
+      : document.getElementById("login-email");
+    if (inputToFocus) inputToFocus.focus();
   }
-  applyTheme(AppState.getState().theme);
 
-  btnThemeToggle.addEventListener("click", () => {
-    const current = AppState.getState().theme;
-    applyTheme(current === "dark" ? "light" : "dark");
-  });
+  function closeAuthModal() {
+    authModal.classList.add("hidden");
+  }
 
-  // ----------------------------------------------------
-  // Auth Tab Toggling
-  // ----------------------------------------------------
+  if (btnCloseAuthModal) {
+    btnCloseAuthModal.addEventListener("click", closeAuthModal);
+  }
+
   function switchAuthTab(isRegister) {
     authAlert.classList.add("hidden");
     clearFormErrors(loginForm);
@@ -125,6 +146,31 @@ document.addEventListener("DOMContentLoaded", () => {
   tabLogin.addEventListener("click", () => switchAuthTab(false));
   tabRegister.addEventListener("click", () => switchAuthTab(true));
 
+  // Trigger Auth Modal from Landing Page CTAs
+  if (btnNavSignin) btnNavSignin.addEventListener("click", () => openAuthModal(false));
+  if (btnNavStart) btnNavStart.addEventListener("click", () => openAuthModal(true));
+  if (btnHeroPrimary) btnHeroPrimary.addEventListener("click", () => {
+    if (API.getToken()) {
+      showWorkspaceView();
+    } else {
+      openAuthModal(true);
+    }
+  });
+  if (btnHeroSecondary) btnHeroSecondary.addEventListener("click", () => {
+    if (API.getToken()) {
+      showWorkspaceView();
+    } else {
+      openAuthModal(false);
+    }
+  });
+  if (btnBottomStart) btnBottomStart.addEventListener("click", () => {
+    if (API.getToken()) {
+      showWorkspaceView();
+    } else {
+      openAuthModal(true);
+    }
+  });
+
   // Password Visibility Toggle
   document.querySelectorAll(".btn-toggle-pw").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -142,12 +188,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // 1-Click Demo Login
+  if (btnQuickDemo) {
+    btnQuickDemo.addEventListener("click", () => {
+      switchAuthTab(false);
+      document.getElementById("login-email").value = "demo@taskflow.dev";
+      document.getElementById("login-password").value = "Password123";
+      loginForm.requestSubmit();
+    });
+  }
+
   // ----------------------------------------------------
-  // Form Error Handling Helpers
+  // Form Error Display Helpers
   // ----------------------------------------------------
   function clearFormErrors(form) {
     form.querySelectorAll(".field-error").forEach((el) => (el.textContent = ""));
-    form.querySelectorAll(".form-input").forEach((el) => el.classList.remove("is-invalid"));
+    form.querySelectorAll(".form-input").forEach((el) => (el.style.borderColor = ""));
   }
 
   function displayFormErrors(form, errors) {
@@ -157,12 +213,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const errEl = form.querySelector(`#${field}-error`) || form.querySelector(`[id$="-${field}-error"]`);
       const inputEl = form.querySelector(`[name="${field}"]`) || form.querySelector(`#${field}`);
       if (errEl) errEl.textContent = message;
-      if (inputEl) inputEl.classList.add("is-invalid");
+      if (inputEl) inputEl.style.borderColor = "var(--coral)";
     }
   }
 
   // ----------------------------------------------------
-  // Auth Flows: Login & Register
+  // Auth Form Submissions (Login & Register)
   // ----------------------------------------------------
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -172,18 +228,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = document.getElementById("login-email").value.trim();
     const password = document.getElementById("login-password").value;
 
-    let hasClientErr = false;
+    let hasErr = false;
     if (!email) {
       document.getElementById("login-email-error").textContent = "Email is required";
-      document.getElementById("login-email").classList.add("is-invalid");
-      hasClientErr = true;
+      hasErr = true;
     }
     if (!password) {
       document.getElementById("login-password-error").textContent = "Password is required";
-      document.getElementById("login-password").classList.add("is-invalid");
-      hasClientErr = true;
+      hasErr = true;
     }
-    if (hasClientErr) return;
+    if (hasErr) return;
 
     const btnSubmit = document.getElementById("btn-login-submit");
     btnSubmit.disabled = true;
@@ -192,8 +246,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       await API.login(email, password);
-      showToast("Signed in successfully!", "success");
-      await initializeApp();
+      showToast("Welcome back! Signed in.", "success");
+      closeAuthModal();
+      await initializeSession();
+      showWorkspaceView();
     } catch (err) {
       if (err.errors) {
         displayFormErrors(loginForm, err.errors);
@@ -217,18 +273,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = document.getElementById("reg-email").value.trim();
     const password = document.getElementById("reg-password").value;
 
-    let hasClientErr = false;
+    let hasErr = false;
     if (!email) {
       document.getElementById("reg-email-error").textContent = "Email is required";
-      document.getElementById("reg-email").classList.add("is-invalid");
-      hasClientErr = true;
+      hasErr = true;
     }
     if (!password || password.length < 8) {
       document.getElementById("reg-password-error").textContent = "Password must be at least 8 characters";
-      document.getElementById("reg-password").classList.add("is-invalid");
-      hasClientErr = true;
+      hasErr = true;
     }
-    if (hasClientErr) return;
+    if (hasErr) return;
 
     const btnSubmit = document.getElementById("btn-register-submit");
     btnSubmit.disabled = true;
@@ -237,10 +291,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       await API.register(email, password, name);
-      // Automatically log the newly registered user in
+      // Auto login
       await API.login(email, password);
-      showToast("Account created successfully!", "success");
-      await initializeApp();
+      showToast("Account created! Welcome to Loopa.", "success");
+      closeAuthModal();
+      await initializeSession();
+      showWorkspaceView();
     } catch (err) {
       if (err.errors) {
         displayFormErrors(registerForm, err.errors);
@@ -256,7 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ----------------------------------------------------
-  // Auth Logout & 401 Session Handling
+  // Logout & 401 Session Expiration
   // ----------------------------------------------------
   async function handleLogout() {
     try {
@@ -266,31 +322,55 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     AppState.setUser(null);
     AppState.setTasks([]);
-    showAuthView("You have been signed out.");
+    updateNavState(false);
+    showLandingView();
+    showToast("Signed out successfully.", "info");
   }
 
-  btnLogout.addEventListener("click", handleLogout);
+  if (btnLogout) btnLogout.addEventListener("click", handleLogout);
+  if (btnNavLogout) btnNavLogout.addEventListener("click", handleLogout);
 
   API.onUnauthorized(() => {
     AppState.setUser(null);
     AppState.setTasks([]);
-    showAuthView("Your session expired. Please sign in again.");
+    updateNavState(false);
+    showLandingView();
+    openAuthModal(false);
+    authAlert.textContent = "Your session expired. Please sign in again.";
+    authAlert.classList.remove("hidden");
   });
 
-  function showAuthView(message = null) {
+  // ----------------------------------------------------
+  // View Transitions (Landing vs Workspace)
+  // ----------------------------------------------------
+  function showLandingView() {
     appView.classList.add("hidden");
-    authView.classList.remove("hidden");
-    if (message) {
-      authAlert.textContent = message;
-      authAlert.classList.remove("hidden");
-    } else {
-      authAlert.classList.add("hidden");
-    }
+    landingView.classList.remove("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function showAppView() {
-    authView.classList.add("hidden");
+  function showWorkspaceView() {
+    landingView.classList.add("hidden");
     appView.classList.remove("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    loadTasks();
+  }
+
+  if (btnNavDashboard) btnNavDashboard.addEventListener("click", showWorkspaceView);
+  if (btnBackToLanding) btnBackToLanding.addEventListener("click", showLandingView);
+
+  function updateNavState(isLoggedIn, user = null) {
+    if (isLoggedIn && user) {
+      navAuthGuest.classList.add("hidden");
+      navAuthUser.classList.remove("hidden");
+      const displayName = user.name ? user.name.split(" ")[0] : user.email.split("@")[0];
+      navUserName.textContent = displayName;
+      userDisplay.textContent = user.name ? `${user.name} (${user.email})` : user.email;
+    } else {
+      navAuthGuest.classList.remove("hidden");
+      navAuthUser.classList.add("hidden");
+      userDisplay.textContent = "";
+    }
   }
 
   // ----------------------------------------------------
@@ -459,15 +539,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const updated = await API.patchTask(task.id, { done: newDone });
       AppState.updateSingleTask(updated);
       showToast(newDone ? "Task marked completed!" : "Task marked as open.", "info");
-      // Refresh to keep sorting/filters consistent
       loadTasks();
     } catch (err) {
       showToast(err.error || "Failed to update task status", "error");
-      loadTasks(); // revert checkbox
+      loadTasks();
     }
   }
 
-  // Add / Edit Modal Logic
   function openAddModal() {
     AppState.setEditingTaskId(null);
     modalTaskTitle.textContent = "Add New Task";
@@ -513,7 +591,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!title) {
       document.getElementById("task-title-error").textContent = "Title is required";
-      taskTitle.classList.add("is-invalid");
       return;
     }
 
@@ -523,11 +600,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       if (editId) {
-        // Edit mode (PATCH)
         await API.patchTask(editId, { title, description, dueDate, priority });
         showToast("Task updated successfully!", "success");
       } else {
-        // Create mode (POST)
         await API.createTask({ title, description, dueDate, priority });
         showToast("Task created successfully!", "success");
       }
@@ -546,7 +621,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Delete Modal Logic
+  // Delete Modal
   function openDeleteModal(task) {
     AppState.setDeletingTask(task);
     deletePreview.textContent = task.title;
@@ -580,7 +655,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Change Password Modal Logic
+  // Change Password Modal
   btnOpenChangePw.addEventListener("click", () => {
     changePwForm.reset();
     clearFormErrors(changePwForm);
@@ -670,6 +745,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Global ESC key to close open modals
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
+      closeAuthModal();
       closeTaskModal();
       closeDeleteModal();
       closePwModal();
@@ -677,23 +753,21 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ----------------------------------------------------
-  // App Initialization
+  // Session Initialization
   // ----------------------------------------------------
-  async function initializeApp() {
+  async function initializeSession() {
     const token = API.getToken();
     if (!token) {
-      showAuthView();
+      updateNavState(false);
       return;
     }
 
     try {
       const user = await API.getMe();
       AppState.setUser(user);
-      userDisplay.textContent = user.name ? `${user.name} (${user.email})` : user.email;
-      showAppView();
-      await loadTasks();
+      updateNavState(true, user);
     } catch (err) {
-      showAuthView("Please sign in to access your tasks.");
+      updateNavState(false);
     }
   }
 
@@ -701,9 +775,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
       .register("/sw.js")
-      .catch((err) => console.log("ServiceWorker registration skipped/failed:", err));
+      .catch((err) => console.log("ServiceWorker registration skipped:", err));
   }
 
-  // Start
-  initializeApp();
+  // Start by initializing current session state
+  initializeSession();
 });
