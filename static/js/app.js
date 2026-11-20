@@ -1,43 +1,25 @@
 /**
- * Loopa / TaskFlow Application Controller
- * Handles Memphis Landing Page navigation, Auth Modal, and Task Workspace.
+ * TaskFlow: Clean, Phone-First Task Tracker Controller
  * 100% Vanilla ES2020+, XSS-safe (DOM createElement + textContent), Accessible.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Views & Containers
-  const landingView = document.getElementById("landing-view");
+  // Views
+  const authView = document.getElementById("auth-view");
   const appView = document.getElementById("app-view");
   const toastContainer = document.getElementById("toast-container");
 
-  // Nav Elements
-  const navAuthGuest = document.getElementById("nav-auth-guest");
-  const navAuthUser = document.getElementById("nav-auth-user");
-  const navUserName = document.getElementById("nav-user-name");
-  const btnNavSignin = document.getElementById("btn-nav-signin");
-  const btnNavStart = document.getElementById("btn-nav-start");
-  const btnNavDashboard = document.getElementById("btn-nav-dashboard");
-  const btnNavLogout = document.getElementById("btn-nav-logout");
-  const btnBackToLanding = document.getElementById("btn-back-to-landing");
-
-  // Hero & Landing Action Buttons
-  const btnHeroPrimary = document.getElementById("btn-hero-primary");
-  const btnHeroSecondary = document.getElementById("btn-hero-secondary");
-  const btnBottomStart = document.getElementById("btn-bottom-start");
-
-  // Auth Modal Elements
-  const authModal = document.getElementById("auth-modal");
+  // Auth Elements
   const tabLogin = document.getElementById("tab-login");
   const tabRegister = document.getElementById("tab-register");
   const loginForm = document.getElementById("login-form");
   const registerForm = document.getElementById("register-form");
   const authAlert = document.getElementById("auth-alert");
   const btnQuickDemo = document.getElementById("btn-quick-demo");
-  const btnCloseAuthModal = document.querySelector(".btn-close-auth-modal");
-
-  // Workspace / Task View Elements
   const userDisplay = document.getElementById("user-display");
   const btnLogout = document.getElementById("btn-logout");
+
+  // Workspace Elements
   const btnOpenAddTask = document.getElementById("btn-open-add-task");
   const searchInput = document.getElementById("search-input");
   const filterChips = document.querySelectorAll(".filter-chip");
@@ -80,9 +62,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const newPwInput = document.getElementById("new-pw");
 
   // ----------------------------------------------------
-  // Toast Notifications (Memphis Tactile)
+  // Toast Notifications
   // ----------------------------------------------------
-  function showToast(message, type = "info", duration = 3500) {
+  function showToast(message, type = "info", duration = 3000) {
     const toast = document.createElement("div");
     toast.className = `toast toast-${type}`;
     toast.setAttribute("role", "status");
@@ -95,32 +77,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setTimeout(() => {
       toast.style.opacity = "0";
-      toast.style.transform = "translateY(-10px)";
-      toast.style.transition = "all 0.25s ease";
-      setTimeout(() => toast.remove(), 250);
+      toast.style.transform = "translateY(-8px)";
+      toast.style.transition = "all 0.2s ease";
+      setTimeout(() => toast.remove(), 200);
     }, duration);
   }
 
   // ----------------------------------------------------
-  // Auth Modal Management
+  // View Visibility Switches
   // ----------------------------------------------------
-  function openAuthModal(isRegister = false) {
-    switchAuthTab(isRegister);
-    authModal.classList.remove("hidden");
-    const inputToFocus = isRegister
-      ? document.getElementById("reg-email")
-      : document.getElementById("login-email");
-    if (inputToFocus) inputToFocus.focus();
+  function showAuthScreen(message = null) {
+    appView.classList.add("hidden");
+    authView.classList.remove("hidden");
+    if (message) {
+      authAlert.textContent = message;
+      authAlert.classList.remove("hidden");
+    } else {
+      authAlert.classList.add("hidden");
+    }
   }
 
-  function closeAuthModal() {
-    authModal.classList.add("hidden");
+  function showWorkspaceScreen() {
+    authView.classList.add("hidden");
+    appView.classList.remove("hidden");
+    loadTasks();
   }
 
-  if (btnCloseAuthModal) {
-    btnCloseAuthModal.addEventListener("click", closeAuthModal);
-  }
-
+  // ----------------------------------------------------
+  // Auth Tab Toggling (Sign In vs Register)
+  // ----------------------------------------------------
   function switchAuthTab(isRegister) {
     authAlert.classList.add("hidden");
     clearFormErrors(loginForm);
@@ -146,31 +131,6 @@ document.addEventListener("DOMContentLoaded", () => {
   tabLogin.addEventListener("click", () => switchAuthTab(false));
   tabRegister.addEventListener("click", () => switchAuthTab(true));
 
-  // Trigger Auth Modal from Landing Page CTAs
-  if (btnNavSignin) btnNavSignin.addEventListener("click", () => openAuthModal(false));
-  if (btnNavStart) btnNavStart.addEventListener("click", () => openAuthModal(true));
-  if (btnHeroPrimary) btnHeroPrimary.addEventListener("click", () => {
-    if (API.getToken()) {
-      showWorkspaceView();
-    } else {
-      openAuthModal(true);
-    }
-  });
-  if (btnHeroSecondary) btnHeroSecondary.addEventListener("click", () => {
-    if (API.getToken()) {
-      showWorkspaceView();
-    } else {
-      openAuthModal(false);
-    }
-  });
-  if (btnBottomStart) btnBottomStart.addEventListener("click", () => {
-    if (API.getToken()) {
-      showWorkspaceView();
-    } else {
-      openAuthModal(true);
-    }
-  });
-
   // Password Visibility Toggle
   document.querySelectorAll(".btn-toggle-pw").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -188,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 1-Click Demo Login
+  // 1-Click Demo Login Button
   if (btnQuickDemo) {
     btnQuickDemo.addEventListener("click", () => {
       switchAuthTab(false);
@@ -199,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----------------------------------------------------
-  // Form Error Display Helpers
+  // Form Error Handling Helpers
   // ----------------------------------------------------
   function clearFormErrors(form) {
     form.querySelectorAll(".field-error").forEach((el) => (el.textContent = ""));
@@ -246,10 +206,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       await API.login(email, password);
-      showToast("Welcome back! Signed in.", "success");
-      closeAuthModal();
-      await initializeSession();
-      showWorkspaceView();
+      showToast("Signed in successfully!", "success");
+      await initializeApp();
     } catch (err) {
       if (err.errors) {
         displayFormErrors(loginForm, err.errors);
@@ -293,10 +251,8 @@ document.addEventListener("DOMContentLoaded", () => {
       await API.register(email, password, name);
       // Auto login
       await API.login(email, password);
-      showToast("Account created! Welcome to Loopa.", "success");
-      closeAuthModal();
-      await initializeSession();
-      showWorkspaceView();
+      showToast("Account created successfully!", "success");
+      await initializeApp();
     } catch (err) {
       if (err.errors) {
         displayFormErrors(registerForm, err.errors);
@@ -322,56 +278,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     AppState.setUser(null);
     AppState.setTasks([]);
-    updateNavState(false);
-    showLandingView();
-    showToast("Signed out successfully.", "info");
+    showAuthScreen("You have been signed out.");
+    showToast("Signed out", "info");
   }
 
   if (btnLogout) btnLogout.addEventListener("click", handleLogout);
-  if (btnNavLogout) btnNavLogout.addEventListener("click", handleLogout);
 
   API.onUnauthorized(() => {
     AppState.setUser(null);
     AppState.setTasks([]);
-    updateNavState(false);
-    showLandingView();
-    openAuthModal(false);
-    authAlert.textContent = "Your session expired. Please sign in again.";
-    authAlert.classList.remove("hidden");
+    showAuthScreen("Your session expired. Please sign in again.");
   });
-
-  // ----------------------------------------------------
-  // View Transitions (Landing vs Workspace)
-  // ----------------------------------------------------
-  function showLandingView() {
-    appView.classList.add("hidden");
-    landingView.classList.remove("hidden");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  function showWorkspaceView() {
-    landingView.classList.add("hidden");
-    appView.classList.remove("hidden");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    loadTasks();
-  }
-
-  if (btnNavDashboard) btnNavDashboard.addEventListener("click", showWorkspaceView);
-  if (btnBackToLanding) btnBackToLanding.addEventListener("click", showLandingView);
-
-  function updateNavState(isLoggedIn, user = null) {
-    if (isLoggedIn && user) {
-      navAuthGuest.classList.add("hidden");
-      navAuthUser.classList.remove("hidden");
-      const displayName = user.name ? user.name.split(" ")[0] : user.email.split("@")[0];
-      navUserName.textContent = displayName;
-      userDisplay.textContent = user.name ? `${user.name} (${user.email})` : user.email;
-    } else {
-      navAuthGuest.classList.remove("hidden");
-      navAuthUser.classList.add("hidden");
-      userDisplay.textContent = "";
-    }
-  }
 
   // ----------------------------------------------------
   // Task Data Fetching & Rendering (Strictly XSS Safe)
@@ -538,7 +455,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const updated = await API.patchTask(task.id, { done: newDone });
       AppState.updateSingleTask(updated);
-      showToast(newDone ? "Task marked completed!" : "Task marked as open.", "info");
+      showToast(newDone ? "Task marked completed!" : "Task marked open.", "info");
       loadTasks();
     } catch (err) {
       showToast(err.error || "Failed to update task status", "error");
@@ -745,7 +662,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Global ESC key to close open modals
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      closeAuthModal();
       closeTaskModal();
       closeDeleteModal();
       closePwModal();
@@ -753,33 +669,25 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ----------------------------------------------------
-  // Session Initialization
+  // App Initialization
   // ----------------------------------------------------
-  async function initializeSession() {
+  async function initializeApp() {
     const token = API.getToken();
     if (!token) {
-      updateNavState(false);
+      showAuthScreen();
       return;
     }
 
     try {
       const user = await API.getMe();
       AppState.setUser(user);
-      updateNavState(true, user);
+      userDisplay.textContent = user.name ? `${user.name} (${user.email})` : user.email;
+      showWorkspaceScreen();
     } catch (err) {
-      updateNavState(false);
+      showAuthScreen("Please sign in to access your tasks.");
     }
   }
 
-  // Unregister any active service worker to prevent stale caching
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      for (const reg of registrations) {
-        reg.unregister();
-      }
-    });
-  }
-
-  // Start by initializing current session state
-  initializeSession();
+  // Start
+  initializeApp();
 });
