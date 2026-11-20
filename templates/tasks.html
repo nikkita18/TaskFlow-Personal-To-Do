@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow — My Tasks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="memphis-body">
+  <!-- Top Header Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="header-left">
+        <div class="logo-tile small">
+          <svg class="logo-glyph" viewBox="0 0 24 24" fill="none" stroke="#17140d" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 13c3-5 5-5 8 0s5 5 8 0" />
+          </svg>
+        </div>
+        <h2 class="app-title">TaskFlow</h2>
+      </div>
+      <div class="header-right">
+        <span class="user-pill">{{ user.name or user.email }}</span>
+        <a href="/logout" class="btn-pill btn-pill-sm btn-pill-coral" style="text-decoration:none;">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="workspace-container">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert-box" style="margin-bottom: 1rem; {% if category == 'success' %}background-color: #e6f7f2; border-color: var(--teal); color: var(--ink);{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- 1. Add New Task Form (Pure HTML POST to Flask) -->
+    <section class="task-card" style="margin-bottom: 0.5rem; flex-direction: column;">
+      <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.5rem;">+ Create New Task</h3>
+      <form method="POST" action="/tasks/new" style="width: 100%;">
+        <div class="form-group">
+          <label for="task-title">Title <span class="text-danger">*</span></label>
+          <input type="text" id="task-title" name="title" required maxlength="120" placeholder="e.g. Finish CN recruitment project" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label for="task-desc">Description</label>
+          <textarea id="task-desc" name="description" rows="2" maxlength="1000" placeholder="Optional notes or details..." class="form-input"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-half">
+            <label for="task-due-date">Due Date</label>
+            <input type="date" id="task-due-date" name="dueDate" class="form-input">
+          </div>
+
+          <div class="form-group col-half">
+            <label for="task-priority">Priority</label>
+            <select id="task-priority" name="priority" class="form-input">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-pill btn-pill-coral" style="margin-top: 0.5rem;">
+          Save Task
+        </button>
+      </form>
+    </section>
+
+    <!-- 2. Filters & Search Form (Pure HTML GET to Flask) -->
+    <section class="controls-panel">
+      <form method="GET" action="/tasks" style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <input type="search" name="q" value="{{ q or '' }}" placeholder="Search tasks by title..." class="form-input" style="flex: 1; min-width: 200px;">
+          <button type="submit" class="btn-pill btn-pill-mustard">Search / Filter</button>
+          {% if q or status != 'all' or priority or sort != 'createdAt' %}
+            <a href="/tasks" class="btn-pill btn-pill-ghost" style="text-decoration: none;">Clear</a>
+          {% endif %}
+        </div>
+
+        <div class="dropdown-controls">
+          <div class="control-select-group">
+            <label for="status-select" class="select-label">Status:</label>
+            <select id="status-select" name="status" class="select-input" onchange="this.form.submit()">
+              <option value="all" {% if status == 'all' %}selected{% endif %}>All Tasks</option>
+              <option value="open" {% if status == 'open' %}selected{% endif %}>Open</option>
+              <option value="done" {% if status == 'done' %}selected{% endif %}>Completed</option>
+            </select>
+          </div>
+
+          <div class="control-select-group">
+            <label for="prio-select" class="select-label">Priority:</label>
+            <select id="prio-select" name="priority" class="select-input" onchange="this.form.submit()">
+              <option value="" {% if not priority %}selected{% endif %}>All Priorities</option>
+              <option value="high" {% if priority == 'high' %}selected{% endif %}>High</option>
+              <option value="medium" {% if priority == 'medium' %}selected{% endif %}>Medium</option>
+              <option value="low" {% if priority == 'low' %}selected{% endif %}>Low</option>
+            </select>
+          </div>
+
+          <div class="control-select-group">
+            <label for="sort-select" class="select-label">Sort:</label>
+            <select id="sort-select" name="sort" class="select-input" onchange="this.form.submit()">
+              <option value="createdAt" {% if sort == 'createdAt' %}selected{% endif %}>Created Date</option>
+              <option value="dueDate" {% if sort == 'dueDate' %}selected{% endif %}>Due Date</option>
+              <option value="priority" {% if sort == 'priority' %}selected{% endif %}>Priority</option>
+            </select>
+          </div>
+
+          <div class="control-select-group">
+            <label for="order-select" class="select-label">Order:</label>
+            <select id="order-select" name="order" class="select-input" onchange="this.form.submit()">
+              <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+              <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- 3. Summary Stats Banner -->
+    <div class="stats-banner">
+      <span class="stat-pill">Total: {{ total_count }}</span>
+      <span class="stat-pill">Open: {{ open_count }}</span>
+      <span class="stat-pill">Completed: {{ completed_count }}</span>
+      {% if overdue_count > 0 %}
+        <span class="stat-pill overdue">⚠️ Overdue: {{ overdue_count }}</span>
+      {% endif %}
+    </div>
+
+    <!-- 4. Tasks List -->
+    <section class="tasks-container">
+      <ul class="task-list">
+        {% for task in tasks %}
+          {% set is_overdue = task.dueDate and task.dueDate < today_str and not task.done %}
+          <li class="task-card {% if task.done %}is-done{% endif %} {% if is_overdue %}is-overdue{% endif %}">
+            <!-- Form to toggle completion status -->
+            <form method="POST" action="/tasks/{{ task.id }}/toggle" style="margin: 0;">
+              <button type="submit" class="btn-task-action" style="min-width: 36px; min-height: 36px;" title="{% if task.done %}Mark Open{% else %}Mark Done{% endif %}">
+                {% if task.done %}✓{% else %}○{% endif %}
+              </button>
+            </form>
+
+            <div class="task-content">
+              <div class="task-header-row">
+                <h3 class="task-title-text">{{ task.title }}</h3>
+              </div>
+              {% if task.description %}
+                <p class="task-desc-text">{{ task.description }}</p>
+              {% endif %}
+              <div class="task-meta-row">
+                <span class="badge badge-priority-{{ task.priority }}">{{ task.priority }}</span>
+                {% if task.dueDate %}
+                  <span class="badge-due {% if is_overdue %}is-overdue-text{% endif %}">
+                    📅 {% if is_overdue %}⚠️ Overdue: {% else %}Due: {% endif %}{{ task.dueDate }}
+                  </span>
+                {% endif %}
+              </div>
+
+              <!-- Collapsible Inline Edit Form -->
+              <details style="margin-top: 0.75rem;">
+                <summary style="font-size: 0.8125rem; font-weight: 700; cursor: pointer; color: var(--ink-muted);">✏️ Edit details</summary>
+                <form method="POST" action="/tasks/{{ task.id }}/edit" style="margin-top: 0.5rem; background: var(--canvas); padding: 0.75rem; border: var(--border-medium); border-radius: var(--radius-sm);">
+                  <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" name="title" value="{{ task.title }}" required class="form-input">
+                  </div>
+                  <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="2" class="form-input">{{ task.description }}</textarea>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group col-half">
+                      <label>Due Date</label>
+                      <input type="date" name="dueDate" value="{{ task.dueDate or '' }}" class="form-input">
+                    </div>
+                    <div class="form-group col-half">
+                      <label>Priority</label>
+                      <select name="priority" class="form-input">
+                        <option value="low" {% if task.priority == 'low' %}selected{% endif %}>Low</option>
+                        <option value="medium" {% if task.priority == 'medium' %}selected{% endif %}>Medium</option>
+                        <option value="high" {% if task.priority == 'high' %}selected{% endif %}>High</option>
+                      </select>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn-pill btn-pill-sm btn-pill-coral">Update</button>
+                </form>
+              </details>
+            </div>
+
+            <div class="task-actions">
+              <!-- Form to delete task -->
+              <form method="POST" action="/tasks/{{ task.id }}/delete" onsubmit="return confirm('Delete this task?');" style="margin: 0;">
+                <button type="submit" class="btn-task-action delete" title="Delete Task">🗑️</button>
+              </form>
+            </div>
+          </li>
+        {% else %}
+          <div class="state-placeholder">
+            <div class="empty-icon">📝</div>
+            <h3>No tasks found</h3>
+            <p class="text-muted">Create a new task above or adjust your search / filters.</p>
+          </div>
+        {% endfor %}
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="memphis-body">
+  <main class="auth-view-wrapper">
+    <div class="auth-card">
+      <header class="auth-header">
+        <div class="logo-tile">
+          <svg class="logo-glyph" viewBox="0 0 24 24" fill="none" stroke="#17140d" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 13c3-5 5-5 8 0s5 5 8 0" />
+          </svg>
+        </div>
+        <h1 class="auth-title">TaskFlow</h1>
+        <p class="auth-subtitle">100% Python Flask &amp; SQL Task Tracker</p>
+      </header>
+
+      <!-- Navigation Tabs between Sign In and Create Account -->
+      <div class="tab-group" role="tablist">
+        <a href="/login" class="tab-btn {% if active_tab != 'register' %}active{% endif %}" style="text-decoration:none; text-align:center; line-height:38px;">Sign In</a>
+        <a href="/register" class="tab-btn {% if active_tab == 'register' %}active{% endif %}" style="text-decoration:none; text-align:center; line-height:38px;">Create Account</a>
+      </div>
+
+      <!-- Quick 1-Click Demo Login Form -->
+      {% if active_tab != 'register' %}
+      <div class="demo-box">
+        <form method="POST" action="/login">
+          <input type="hidden" name="email" value="demo@taskflow.dev">
+          <input type="hidden" name="password" value="Password123">
+          <button type="submit" class="btn-demo">
+            ⚡ 1-Click Demo Login (demo@taskflow.dev)
+          </button>
+        </form>
+      </div>
+      {% endif %}
+
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert-box">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% if active_tab == 'register' %}
+      <!-- Create Account Form -->
+      <form method="POST" action="/register">
+        <div class="form-group">
+          <label for="reg-name">Full Name <span class="text-muted">(Optional)</span></label>
+          <input type="text" id="reg-name" name="name" maxlength="80" value="{{ name or '' }}" placeholder="Asha Sharma" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label for="reg-email">Email Address</label>
+          <input type="email" id="reg-email" name="email" required value="{{ email or '' }}" placeholder="name@example.com" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label for="reg-password">Password</label>
+          <input type="password" id="reg-password" name="password" required placeholder="At least 8 chars with 1 letter & 1 digit" class="form-input">
+          <small class="form-hint">8–128 characters, with at least one letter and one number.</small>
+        </div>
+
+        <button type="submit" class="btn-pill btn-pill-coral btn-block">
+          Create Account
+        </button>
+      </form>
+      {% else %}
+      <!-- Sign In Form -->
+      <form method="POST" action="/login">
+        <div class="form-group">
+          <label for="login-email">Email Address</label>
+          <input type="email" id="login-email" name="email" required value="{{ email or '' }}" placeholder="name@example.com" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" name="password" required placeholder="••••••••" class="form-input">
+        </div>
+
+        <button type="submit" class="btn-pill btn-pill-coral btn-block">
+          Sign In
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </main>
+</body>
+</html>
