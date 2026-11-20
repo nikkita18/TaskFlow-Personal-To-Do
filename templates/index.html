@@ -10,7 +10,20 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/style.css?v=memphis_1">
+  <script>
+    // Automatically purge old service workers and cache storage
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        for (const reg of regs) reg.unregister();
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(keys => {
+        for (const k of keys) caches.delete(k);
+      });
+    }
+  </script>
 </head>
 <body class="memphis-body">
   <!-- Toast Notification Container -->
@@ -611,8 +624,8 @@
   </div>
 
   <!-- Scripts -->
-  <script src="/static/js/api.js"></script>
-  <script src="/static/js/state.js"></script>
-  <script src="/static/js/app.js"></script>
+  <script src="/static/js/api.js?v=memphis_1"></script>
+  <script src="/static/js/state.js?v=memphis_1"></script>
+  <script src="/static/js/app.js?v=memphis_1"></script>
 </body>
 </html>

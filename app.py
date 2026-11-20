@@ -44,6 +44,13 @@ def create_app(test_config=None):
     def internal_error(e):
         return jsonify({"error": "Internal server error"}), 500
 
+    @app.after_request
+    def add_cache_headers(response):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+
     return app
 
 app = create_app()

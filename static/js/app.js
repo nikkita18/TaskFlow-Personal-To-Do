@@ -771,11 +771,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Register PWA service worker if supported
+  // Unregister any active service worker to prevent stale caching
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker
-      .register("/sw.js")
-      .catch((err) => console.log("ServiceWorker registration skipped:", err));
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const reg of registrations) {
+        reg.unregister();
+      }
+    });
   }
 
   // Start by initializing current session state
