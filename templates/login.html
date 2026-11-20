@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/style.css?v=sleek_1">
 </head>
 <body class="memphis-body">
   <main class="auth-view-wrapper">
@@ -19,13 +19,13 @@
           </svg>
         </div>
         <h1 class="auth-title">TaskFlow</h1>
-        <p class="auth-subtitle">100% Python Flask &amp; SQL Task Tracker</p>
+        <p class="text-muted" style="font-size: 0.8125rem;">Personal task manager built with Python &amp; SQL</p>
       </header>
 
-      <!-- Navigation Tabs between Sign In and Create Account -->
+      <!-- Navigation Tabs: Sign In vs Create Account -->
       <div class="tab-group" role="tablist">
-        <a href="/login" class="tab-btn {% if active_tab != 'register' %}active{% endif %}" style="text-decoration:none; text-align:center; line-height:38px;">Sign In</a>
-        <a href="/register" class="tab-btn {% if active_tab == 'register' %}active{% endif %}" style="text-decoration:none; text-align:center; line-height:38px;">Create Account</a>
+        <a href="/login" class="tab-btn {% if active_tab != 'register' %}active{% endif %}">Sign In</a>
+        <a href="/register" class="tab-btn {% if active_tab == 'register' %}active{% endif %}">Create Account</a>
       </div>
 
       <!-- Quick 1-Click Demo Login Form -->
@@ -66,10 +66,10 @@
         <div class="form-group">
           <label for="reg-password">Password</label>
           <input type="password" id="reg-password" name="password" required placeholder="At least 8 chars with 1 letter & 1 digit" class="form-input">
-          <small class="form-hint">8–128 characters, with at least one letter and one number.</small>
+          <small class="text-muted" style="font-size: 0.75rem;">8–128 characters, with at least one letter and one number.</small>
         </div>
 
-        <button type="submit" class="btn-pill btn-pill-coral btn-block">
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
           Create Account
         </button>
       </form>
@@ -86,7 +86,7 @@
           <input type="password" id="login-password" name="password" required placeholder="••••••••" class="form-input">
         </div>
 
-        <button type="submit" class="btn-pill btn-pill-coral btn-block">
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
           Sign In
         </button>
       </form>

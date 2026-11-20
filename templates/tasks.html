@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/style.css?v=sleek_1">
 </head>
 <body class="memphis-body">
   <!-- Top Header Navigation -->
@@ -23,112 +23,91 @@
       </div>
       <div class="header-right">
         <span class="user-pill">{{ user.name or user.email }}</span>
-        <a href="/logout" class="btn-pill btn-pill-sm btn-pill-coral" style="text-decoration:none;">Logout</a>
+        <a href="/logout" class="btn btn-ghost btn-sm">Logout</a>
       </div>
     </div>
   </header>
 
   <!-- Main Workspace -->
   <main class="workspace-container">
-    <!-- Flash Messages -->
+    <!-- Flash Notification Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-          <div class="alert-box" style="margin-bottom: 1rem; {% if category == 'success' %}background-color: #e6f7f2; border-color: var(--teal); color: var(--ink);{% endif %}">
+          <div class="alert-box" style="{% if category == 'success' %}background-color: var(--teal-soft); border-color: var(--teal); color: #047857;{% endif %}">
             {{ message }}
           </div>
         {% endfor %}
       {% endif %}
     {% endwith %}
 
-    <!-- 1. Add New Task Form (Pure HTML POST to Flask) -->
-    <section class="task-card" style="margin-bottom: 0.5rem; flex-direction: column;">
-      <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.5rem;">+ Create New Task</h3>
-      <form method="POST" action="/tasks/new" style="width: 100%;">
-        <div class="form-group">
-          <label for="task-title">Title <span class="text-danger">*</span></label>
-          <input type="text" id="task-title" name="title" required maxlength="120" placeholder="e.g. Finish CN recruitment project" class="form-input">
-        </div>
+    <!-- Top Action Row: Headline + "+ New Task" Button -->
+    <div class="top-action-row">
+      <div>
+        <h1 style="font-size: 1.5rem;">My Workspace</h1>
+        <p class="text-muted" style="font-size: 0.8125rem;">Manage and organize your tasks</p>
+      </div>
+      <!-- Pure CSS Modal Trigger (Zero JS) -->
+      <a href="#modal-new-task" class="btn btn-primary">
+        + New Task
+      </a>
+    </div>
 
-        <div class="form-group">
-          <label for="task-desc">Description</label>
-          <textarea id="task-desc" name="description" rows="2" maxlength="1000" placeholder="Optional notes or details..." class="form-input"></textarea>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group col-half">
-            <label for="task-due-date">Due Date</label>
-            <input type="date" id="task-due-date" name="dueDate" class="form-input">
+    <!-- Toolbar: Search, Filters & Sorting (Pure HTML Form GET) -->
+    <div class="toolbar-card">
+      <form method="GET" action="/tasks">
+        <div class="search-filter-row">
+          <div class="search-input-wrapper">
+            <input type="search" name="q" value="{{ q or '' }}" placeholder="Search tasks by title..." class="form-input">
           </div>
-
-          <div class="form-group col-half">
-            <label for="task-priority">Priority</label>
-            <select id="task-priority" name="priority" class="form-input">
-              <option value="low">Low</option>
-              <option value="medium" selected>Medium</option>
-              <option value="high">High</option>
-            </select>
-          </div>
-        </div>
-
-        <button type="submit" class="btn-pill btn-pill-coral" style="margin-top: 0.5rem;">
-          Save Task
-        </button>
-      </form>
-    </section>
-
-    <!-- 2. Filters & Search Form (Pure HTML GET to Flask) -->
-    <section class="controls-panel">
-      <form method="GET" action="/tasks" style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <input type="search" name="q" value="{{ q or '' }}" placeholder="Search tasks by title..." class="form-input" style="flex: 1; min-width: 200px;">
-          <button type="submit" class="btn-pill btn-pill-mustard">Search / Filter</button>
+          <button type="submit" class="btn btn-ghost btn-sm" style="min-height: 42px;">Search</button>
           {% if q or status != 'all' or priority or sort != 'createdAt' %}
-            <a href="/tasks" class="btn-pill btn-pill-ghost" style="text-decoration: none;">Clear</a>
+            <a href="/tasks" class="btn btn-ghost btn-sm" style="min-height: 42px;">Clear</a>
           {% endif %}
         </div>
 
-        <div class="dropdown-controls">
-          <div class="control-select-group">
-            <label for="status-select" class="select-label">Status:</label>
-            <select id="status-select" name="status" class="select-input" onchange="this.form.submit()">
-              <option value="all" {% if status == 'all' %}selected{% endif %}>All Tasks</option>
-              <option value="open" {% if status == 'open' %}selected{% endif %}>Open</option>
-              <option value="done" {% if status == 'done' %}selected{% endif %}>Completed</option>
-            </select>
+        <div class="filter-pills-row">
+          <!-- Status Tabs -->
+          <div class="status-tabs">
+            <a href="/tasks?status=all{% if priority %}&priority={{ priority }}{% endif %}{% if q %}&q={{ q }}{% endif %}" class="tab-link {% if status == 'all' %}active{% endif %}">All</a>
+            <a href="/tasks?status=open{% if priority %}&priority={{ priority }}{% endif %}{% if q %}&q={{ q }}{% endif %}" class="tab-link {% if status == 'open' %}active{% endif %}">Open</a>
+            <a href="/tasks?status=done{% if priority %}&priority={{ priority }}{% endif %}{% if q %}&q={{ q }}{% endif %}" class="tab-link {% if status == 'done' %}active{% endif %}">Completed</a>
           </div>
 
-          <div class="control-select-group">
-            <label for="prio-select" class="select-label">Priority:</label>
-            <select id="prio-select" name="priority" class="select-input" onchange="this.form.submit()">
-              <option value="" {% if not priority %}selected{% endif %}>All Priorities</option>
-              <option value="high" {% if priority == 'high' %}selected{% endif %}>High</option>
-              <option value="medium" {% if priority == 'medium' %}selected{% endif %}>Medium</option>
-              <option value="low" {% if priority == 'low' %}selected{% endif %}>Low</option>
-            </select>
-          </div>
+          <!-- Dropdowns -->
+          <div class="dropdown-cluster">
+            <div class="dropdown-group">
+              <label for="priority-sel">Priority:</label>
+              <select id="priority-sel" name="priority" onchange="this.form.submit()">
+                <option value="" {% if not priority %}selected{% endif %}>All</option>
+                <option value="high" {% if priority == 'high' %}selected{% endif %}>High</option>
+                <option value="medium" {% if priority == 'medium' %}selected{% endif %}>Medium</option>
+                <option value="low" {% if priority == 'low' %}selected{% endif %}>Low</option>
+              </select>
+            </div>
 
-          <div class="control-select-group">
-            <label for="sort-select" class="select-label">Sort:</label>
-            <select id="sort-select" name="sort" class="select-input" onchange="this.form.submit()">
-              <option value="createdAt" {% if sort == 'createdAt' %}selected{% endif %}>Created Date</option>
-              <option value="dueDate" {% if sort == 'dueDate' %}selected{% endif %}>Due Date</option>
-              <option value="priority" {% if sort == 'priority' %}selected{% endif %}>Priority</option>
-            </select>
-          </div>
+            <div class="dropdown-group">
+              <label for="sort-sel">Sort:</label>
+              <select id="sort-sel" name="sort" onchange="this.form.submit()">
+                <option value="createdAt" {% if sort == 'createdAt' %}selected{% endif %}>Date Created</option>
+                <option value="dueDate" {% if sort == 'dueDate' %}selected{% endif %}>Due Date</option>
+                <option value="priority" {% if sort == 'priority' %}selected{% endif %}>Priority</option>
+              </select>
+            </div>
 
-          <div class="control-select-group">
-            <label for="order-select" class="select-label">Order:</label>
-            <select id="order-select" name="order" class="select-input" onchange="this.form.submit()">
-              <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
-              <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
-            </select>
+            <div class="dropdown-group">
+              <label for="order-sel">Order:</label>
+              <select id="order-sel" name="order" onchange="this.form.submit()">
+                <option value="desc" {% if order == 'desc' %}selected{% endif %}>Desc</option>
+                <option value="asc" {% if order == 'asc' %}selected{% endif %}>Asc</option>
+              </select>
+            </div>
           </div>
         </div>
       </form>
-    </section>
+    </div>
 
-    <!-- 3. Summary Stats Banner -->
+    <!-- Summary Stats Chips -->
     <div class="stats-banner">
       <span class="stat-pill">Total: {{ total_count }}</span>
       <span class="stat-pill">Open: {{ open_count }}</span>
@@ -138,7 +117,7 @@
       {% endif %}
     </div>
 
-    <!-- 4. Tasks List -->
+    <!-- Task Cards List -->
     <section class="tasks-container">
       <ul class="task-list">
         {% for task in tasks %}
@@ -146,15 +125,13 @@
           <li class="task-card {% if task.done %}is-done{% endif %} {% if is_overdue %}is-overdue{% endif %}">
             <!-- Form to toggle completion status -->
             <form method="POST" action="/tasks/{{ task.id }}/toggle" style="margin: 0;">
-              <button type="submit" class="btn-task-action" style="min-width: 36px; min-height: 36px;" title="{% if task.done %}Mark Open{% else %}Mark Done{% endif %}">
-                {% if task.done %}✓{% else %}○{% endif %}
+              <button type="submit" class="toggle-check-btn {% if task.done %}checked{% endif %}" title="{% if task.done %}Mark Open{% else %}Mark Done{% endif %}">
+                {% if task.done %}✓{% endif %}
               </button>
             </form>
 
             <div class="task-content">
-              <div class="task-header-row">
-                <h3 class="task-title-text">{{ task.title }}</h3>
-              </div>
+              <h3 class="task-title-text">{{ task.title }}</h3>
               {% if task.description %}
                 <p class="task-desc-text">{{ task.description }}</p>
               {% endif %}
@@ -166,54 +143,109 @@
                   </span>
                 {% endif %}
               </div>
-
-              <!-- Collapsible Inline Edit Form -->
-              <details style="margin-top: 0.75rem;">
-                <summary style="font-size: 0.8125rem; font-weight: 700; cursor: pointer; color: var(--ink-muted);">✏️ Edit details</summary>
-                <form method="POST" action="/tasks/{{ task.id }}/edit" style="margin-top: 0.5rem; background: var(--canvas); padding: 0.75rem; border: var(--border-medium); border-radius: var(--radius-sm);">
-                  <div class="form-group">
-                    <label>Title</label>
-                    <input type="text" name="title" value="{{ task.title }}" required class="form-input">
-                  </div>
-                  <div class="form-group">
-                    <label>Description</label>
-                    <textarea name="description" rows="2" class="form-input">{{ task.description }}</textarea>
-                  </div>
-                  <div class="form-row">
-                    <div class="form-group col-half">
-                      <label>Due Date</label>
-                      <input type="date" name="dueDate" value="{{ task.dueDate or '' }}" class="form-input">
-                    </div>
-                    <div class="form-group col-half">
-                      <label>Priority</label>
-                      <select name="priority" class="form-input">
-                        <option value="low" {% if task.priority == 'low' %}selected{% endif %}>Low</option>
-                        <option value="medium" {% if task.priority == 'medium' %}selected{% endif %}>Medium</option>
-                        <option value="high" {% if task.priority == 'high' %}selected{% endif %}>High</option>
-                      </select>
-                    </div>
-                  </div>
-                  <button type="submit" class="btn-pill btn-pill-sm btn-pill-coral">Update</button>
-                </form>
-              </details>
             </div>
 
+            <!-- Action Buttons: Edit Modal Trigger & Delete Form -->
             <div class="task-actions">
-              <!-- Form to delete task -->
+              <a href="#modal-edit-{{ task.id }}" class="btn-icon" title="Edit Task">✏️</a>
+
               <form method="POST" action="/tasks/{{ task.id }}/delete" onsubmit="return confirm('Delete this task?');" style="margin: 0;">
-                <button type="submit" class="btn-task-action delete" title="Delete Task">🗑️</button>
+                <button type="submit" class="btn-icon btn-delete" title="Delete Task">🗑️</button>
               </form>
             </div>
           </li>
+
+          <!-- PURE CSS EDIT MODAL FOR THIS TASK (Zero JS) -->
+          <div id="modal-edit-{{ task.id }}" class="modal-overlay">
+            <div class="modal-card">
+              <div class="modal-header">
+                <h3>Edit Task</h3>
+                <a href="#" class="modal-close-btn">&times;</a>
+              </div>
+              <form method="POST" action="/tasks/{{ task.id }}/edit">
+                <div class="form-group">
+                  <label>Title <span class="text-danger">*</span></label>
+                  <input type="text" name="title" value="{{ task.title }}" required class="form-input">
+                </div>
+                <div class="form-group">
+                  <label>Description</label>
+                  <textarea name="description" rows="3" class="form-input">{{ task.description }}</textarea>
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-half">
+                    <label>Due Date</label>
+                    <input type="date" name="dueDate" value="{{ task.dueDate or '' }}" class="form-input">
+                  </div>
+                  <div class="form-group col-half">
+                    <label>Priority</label>
+                    <select name="priority" class="form-input">
+                      <option value="low" {% if task.priority == 'low' %}selected{% endif %}>Low</option>
+                      <option value="medium" {% if task.priority == 'medium' %}selected{% endif %}>Medium</option>
+                      <option value="high" {% if task.priority == 'high' %}selected{% endif %}>High</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="modal-actions">
+                  <a href="#" class="btn btn-ghost btn-sm">Cancel</a>
+                  <button type="submit" class="btn btn-primary btn-sm">Update Task</button>
+                </div>
+              </form>
+            </div>
+          </div>
         {% else %}
-          <div class="state-placeholder">
-            <div class="empty-icon">📝</div>
-            <h3>No tasks found</h3>
-            <p class="text-muted">Create a new task above or adjust your search / filters.</p>
+          <div class="empty-state-box">
+            <div style="font-size: 2.2rem;">📝</div>
+            <h3 style="font-size: 1.15rem;">No tasks found</h3>
+            <p class="text-muted" style="font-size: 0.875rem;">Create a new task with "+ New Task" or adjust your filters.</p>
           </div>
         {% endfor %}
       </ul>
     </section>
   </main>
+
+  <!-- ========================================================
+       PURE CSS "+ NEW TASK" MODAL (Zero JS)
+       Appears when clicking "+ New Task" (<a href="#modal-new-task">)
+       ======================================================== -->
+  <div id="modal-new-task" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Create New Task</h3>
+        <a href="#" class="modal-close-btn">&times;</a>
+      </div>
+      <form method="POST" action="/tasks/new">
+        <div class="form-group">
+          <label for="new-title">Title <span class="text-danger">*</span></label>
+          <input type="text" id="new-title" name="title" required maxlength="120" placeholder="e.g. Finish database migration" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label for="new-desc">Description</label>
+          <textarea id="new-desc" name="description" rows="3" maxlength="1000" placeholder="Optional notes or context..." class="form-input"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-half">
+            <label for="new-due">Due Date</label>
+            <input type="date" id="new-due" name="dueDate" class="form-input">
+          </div>
+
+          <div class="form-group col-half">
+            <label for="new-prio">Priority</label>
+            <select id="new-prio" name="priority" class="form-input">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <a href="#" class="btn btn-ghost btn-sm">Cancel</a>
+          <button type="submit" class="btn btn-coral btn-sm">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </body>
 </html>
