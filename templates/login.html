@@ -7,15 +7,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/style.css?v=sleek_1">
+  <link rel="stylesheet" href="/static/css/style.css?v=memphis_pure_v3">
 </head>
 <body class="memphis-body">
   <main class="auth-view-wrapper">
     <div class="auth-card">
       <header class="auth-header">
-        <div class="auth-logo-badge" aria-hidden="true">✓</div>
+        <div class="logo-tile">
+          <svg class="logo-glyph" viewBox="0 0 24 24" fill="none" stroke="#17140d" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 13c3-5 5-5 8 0s5 5 8 0" />
+          </svg>
+        </div>
         <h1 class="auth-title">TaskFlow</h1>
-        <p class="text-muted" style="font-size: 0.8125rem;">Personal task manager built with Python &amp; SQL</p>
+        <p class="text-muted" style="font-size: 0.875rem;">Streamlined personal task management</p>
       </header>
 
       <!-- Navigation Tabs: Sign In vs Create Account -->
@@ -41,7 +45,9 @@
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
-            <div class="alert-box">{{ message }}</div>
+            <div class="alert-box {% if category == 'success' %}alert-success{% endif %}">
+              {{ message }}
+            </div>
           {% endfor %}
         {% endif %}
       {% endwith %}
@@ -65,7 +71,7 @@
           <small class="text-muted" style="font-size: 0.75rem;">8–128 characters, with at least one letter and one number.</small>
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+        <button type="submit" class="btn-pill btn-pill-coral btn-block" style="margin-top: 0.75rem;">
           Create Account
         </button>
       </form>
@@ -82,7 +88,7 @@
           <input type="password" id="login-password" name="password" required placeholder="••••••••" class="form-input">
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+        <button type="submit" class="btn-pill btn-pill-coral btn-block" style="margin-top: 0.75rem;">
           Sign In
         </button>
       </form>
