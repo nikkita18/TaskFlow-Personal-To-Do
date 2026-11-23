@@ -26,6 +26,7 @@ Thumbs.db
 
 # Local interview notes & problem spec
 *.pdf
+generate_interview_pdf.py
 INTERVIEW_CHEATSHEET.md
 MEMPHIS_UI_SPEC.md
 PLAN.md
