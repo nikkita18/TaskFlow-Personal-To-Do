@@ -854,17 +854,318 @@ button, input, select, textarea {
   box-shadow: 1px 1px 0 #17140d;
 }
 
-/* Responsive */
+.search-btn-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* ============================================================
+   PHONE-FIRST RESPONSIVE DESIGN (360px up to 1280px+)
+   Track C Requirements:
+   - Designed for 360px phone screens first
+   - Minimum 44px touch targets on all interactive controls
+   - Strictly zero sideways scrolling (no overflow-x)
+   - Clean readable forms, cards, and modal popups on mobile
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .workspace-container {
+    padding: 1.25rem 0.85rem 3.5rem;
+    gap: 1rem;
+  }
+}
+
 @media (max-width: 640px) {
+  /* Prevent horizontal scroll */
+  html, body.memphis-body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Navigation Header on Mobile */
+  .app-header {
+    padding: 0.65rem 0.75rem;
+  }
+  .header-container {
+    gap: 0.5rem;
+  }
+  .header-left {
+    gap: 0.5rem;
+  }
+  .logo-tile {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+  }
+  .logo-glyph {
+    width: 20px;
+    height: 20px;
+  }
+  .app-title {
+    font-size: 1.2rem;
+  }
+  .header-right {
+    gap: 0.4rem;
+  }
+  .user-pill {
+    max-width: 105px;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.55rem;
+  }
+  .btn-pill-sm {
+    min-height: 40px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  /* Top Action Row (Heading & + New Task) */
   .top-action-row {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 0.75rem;
   }
-  .form-row {
+  .top-title-group h1 {
+    font-size: 1.5rem;
+  }
+  .btn-new-task {
+    width: 100%;
+    min-height: 48px;
+    font-size: 1rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Toolbar: Search & Filters */
+  .toolbar-card {
+    padding: 0.95rem;
+    gap: 0.85rem;
+    border-radius: var(--radius-md);
+  }
+  .search-filter-row {
     flex-direction: column;
+    gap: 0.5rem;
   }
+  .search-input-wrapper {
+    width: 100%;
+    min-width: 0;
+  }
+  .search-input-wrapper .form-input {
+    min-height: 46px;
+    font-size: 1rem;
+  }
+  .search-btn-group {
+    width: 100%;
+    display: flex;
+    gap: 0.5rem;
+  }
+  .search-btn-group .btn-pill {
+    flex: 1;
+    min-height: 44px;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  /* Filter Tabs on Mobile */
   .filter-pills-row {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding-top: 0.75rem;
+  }
+  .status-tabs {
+    display: flex;
+    width: 100%;
+    gap: 0.35rem;
+  }
+  .status-tabs .tab-link {
+    flex: 1;
+    text-align: center;
+    padding: 0.5rem 0.35rem;
+    font-size: 0.8125rem;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Dropdown Cluster (Priority, Sort, Order in 2-column mobile grid) */
+  .dropdown-cluster {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .dropdown-group {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+  }
+  .dropdown-group:last-child {
+    grid-column: span 2;
+  }
+  .dropdown-group select {
+    width: 100%;
+    min-height: 44px;
+    font-size: 0.875rem;
+    padding: 0.4rem 0.65rem;
+  }
+
+  /* Summary Stats (Clean 2x2 Grid on Mobile) */
+  .stats-banner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .stat-pill {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.8125rem;
+    padding: 0.4rem 0.5rem;
+  }
+
+  /* Task Cards on Mobile */
+  .task-card {
+    padding: 1rem 0.85rem;
+    gap: 0.75rem;
+    border-radius: var(--radius-md);
+  }
+  .toggle-check-btn {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    border-radius: 6px;
+    font-size: 1.1rem;
+  }
+  .task-content {
+    min-width: 0;
+  }
+  .task-title-text {
+    font-size: 1.05rem;
+    line-height: 1.35;
+  }
+  .task-desc-text {
+    font-size: 0.875rem;
+    margin-top: 0.3rem;
+  }
+  .task-meta-row {
+    margin-top: 0.65rem;
+    gap: 0.4rem;
+  }
+  .badge {
+    font-size: 0.6875rem;
+    padding: 0.2rem 0.45rem;
+  }
+  .badge-due {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.45rem;
+  }
+  .task-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .btn-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  /* Forms and Modals on Mobile */
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  .modal-overlay {
+    padding: 0.75rem;
+    align-items: center;
+  }
+  .modal-card {
+    padding: 1.25rem 1rem;
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius-md);
+    box-shadow: 6px 6px 0 #17140d;
+  }
+  .modal-header {
+    margin-bottom: 1rem;
+  }
+  .modal-header h3 {
+    font-size: 1.25rem;
+  }
+  .modal-close-btn {
+    font-size: 1.6rem;
+    padding: 0.2rem 0.4rem;
+  }
+  .modal-actions {
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 1.25rem;
+  }
+  .modal-actions .btn-pill {
+    width: 100%;
+    min-height: 48px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Auth View (Login / Register Screen) on Phones */
+@media (max-width: 480px) {
+  .auth-view-wrapper {
+    padding: 1.25rem 0.75rem;
+  }
+  .auth-card {
+    padding: 1.5rem 1.15rem;
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius-md);
+    box-shadow: 6px 6px 0 #17140d;
+  }
+  .auth-header {
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .auth-title {
+    font-size: 1.85rem;
+  }
+  .tab-group {
+    margin-bottom: 1.15rem;
+    padding: 4px;
+  }
+  .tab-btn {
+    padding: 0.55rem 0.5rem;
+    font-size: 0.8125rem;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .demo-box {
+    margin-bottom: 1.15rem;
+  }
+  .btn-demo {
+    min-height: 48px;
+    font-size: 0.8125rem;
+    padding: 0.65rem 0.75rem;
+  }
+  .form-group {
+    margin-bottom: 0.95rem;
+  }
+  .form-input {
+    min-height: 48px;
+    font-size: 1rem; /* 16px font prevents iOS Safari auto-zoom */
+    padding: 0.65rem 0.85rem;
+  }
+  .btn-pill.btn-block {
+    min-height: 48px;
+    font-size: 1rem;
   }
 }

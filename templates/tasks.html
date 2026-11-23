@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/style.css?v=memphis_pure_v3">
+  <link rel="stylesheet" href="/static/css/style.css?v=mobile_phone_first_v4">
 </head>
 <body class="memphis-body">
   <!-- Top Header Navigation -->
@@ -43,12 +43,12 @@
 
     <!-- Top Action Row: Headline + "+ New Task" Button -->
     <div class="top-action-row">
-      <div>
+      <div class="top-title-group">
         <h1>My Tasks</h1>
         <p class="text-muted" style="font-size: 0.875rem;">Postmodern task management powered by Python &amp; SQL</p>
       </div>
       <!-- Pure CSS Modal Trigger (Zero JS) -->
-      <a href="#modal-new-task" class="btn-pill btn-pill-coral">
+      <a href="#modal-new-task" class="btn-pill btn-pill-coral btn-new-task">
         + New Task
       </a>
     </div>
@@ -60,10 +60,12 @@
           <div class="search-input-wrapper">
             <input type="search" name="q" value="{{ q or '' }}" placeholder="Search tasks by title..." class="form-input">
           </div>
-          <button type="submit" class="btn-pill btn-pill-mustard">Search</button>
-          {% if q or status != 'all' or priority or sort != 'createdAt' %}
-            <a href="/tasks" class="btn-pill btn-pill-ghost">Clear</a>
-          {% endif %}
+          <div class="search-btn-group">
+            <button type="submit" class="btn-pill btn-pill-mustard">Search</button>
+            {% if q or status != 'all' or priority or sort != 'createdAt' %}
+              <a href="/tasks" class="btn-pill btn-pill-ghost">Clear</a>
+            {% endif %}
+          </div>
         </div>
 
         <div class="filter-pills-row">
