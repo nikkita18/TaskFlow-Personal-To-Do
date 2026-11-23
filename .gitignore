@@ -23,3 +23,10 @@ ENV/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local interview notes & problem spec
+*.pdf
+INTERVIEW_CHEATSHEET.md
+MEMPHIS_UI_SPEC.md
+PLAN.md
+
