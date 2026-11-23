@@ -83,9 +83,10 @@ TaskFlow follows a strictly **layered architecture** to ensure separation of con
 * **`database.py`**: Connection management and SQLite schema definitions. Runs `init_db()` automatically on app launch, creating `users`, `active_tokens`, `tasks`, and `login_attempts` tables if they don't already exist.
 * **`models.py`**: Storage abstraction layer. Handles salted PBKDF2 password hashing (100,000 iterations), token generation and validation, brute-force rate-limiting, and SQL query generation for filtering and sorting.
 * **`validators.py`**: Pure validation layer. Enforces strict input rules and compiles multi-field error maps (`{"errors": {"field": "reason"}}`) so clients receive all issues at once.
+* **`routes/views.py`**: Pure Python server-rendered UI routes (`/login`, `/register`, `/logout`, `/tasks`, `/tasks/new`, `/tasks/<id>/edit`, `/tasks/<id>/toggle`, `/tasks/<id>/delete`). Uses standard tamper-proof Flask sessions and pure CSS `:target` modals with zero JavaScript dependencies.
 * **`routes/auth.py`**: Endpoints for user onboarding, authentication, session termination, and profile retrieval.
 * **`routes/tasks.py`**: Endpoints for task creation, retrieval, partial updates, and deletion with strict user ownership isolation.
-* **`static/`**: Vanilla frontend built phone-first without any third-party UI libraries (No React/Vue, No Bootstrap/Tailwind). All DOM nodes are rendered safely with `textContent` to ensure total immunity against XSS.
+* **`static/`**: Memphis Postmodern CSS design system (`style.css`), SVG icons, and PWA manifest (`manifest.json`). Designed phone-first (360px up to desktop) with 44px minimum touch targets and zero JS.
 
 ---
 
@@ -175,13 +176,14 @@ CREATE TABLE login_attempts (
 
 ## 5. Security Decisions & Token Storage Trade-offs
 
-### Token Storage Strategy
-* **Implementation:** The client stores the bearer authentication token in browser storage (`localStorage` by default for seamless return sessions, with automatic session fallback).
+### Token & Session Storage Strategy
+* **Web UI Implementation:** For browser interactions, authentication state is maintained via Flask's signed, HTTP-only session cookies (`session['user_id']`), secured with cryptographic HMAC signing (`SECRET_KEY`).
+* **REST API Implementation:** For automated API clients and tests, authentication uses 64-character cryptographic tokens passed in the `Authorization: Bearer <token>` header, tracked server-side in the `active_tokens` SQLite table with a 24-hour expiration window.
 * **Security Analysis & Trade-off:**
-  - *Storage Options considered:*
-    1. **`localStorage` vs `sessionStorage`:** `localStorage` persists across tab closures and reloads, delivering superior UX for personal task tracking on mobile. However, any script running on the same origin could theoretically inspect storage if an XSS flaw existed.
-    2. **XSS Mitigation:** To eliminate XSS vulnerabilities, TaskFlow **strictly forbids raw `innerHTML`**. All user inputs (titles, descriptions, email strings) are injected into the DOM exclusively using `.textContent` and safe DOM node creation methods.
-    3. **Session Invalidation:** The server persists active tokens in SQLite. When `/api/auth/logout` is called, the specific session token is removed from `active_tokens` instantly. Other active sessions belonging to the same user remain unaffected.
+  - *Browser Storage vs Signed HTTP-only Cookies:*
+    1. **Protection against XSS:** Standard client-side storage (`localStorage` / `sessionStorage`) can be read by malicious JavaScript if an XSS vulnerability exists. Using HTTP-only signed session cookies ensures client-side scripts can never extract the authentication credential.
+    2. **Tamper Resistance:** Flask cryptographically signs session cookies using `SECRET_KEY`, making them impossible to alter or forge on the client side.
+    3. **Session Invalidation:** The server persists active API tokens in SQLite. When `/api/auth/logout` is called, the specific session token is removed from `active_tokens` instantly. Other active sessions belonging to the same user remain unaffected.
   - *Identical 401 Responses:* To defend against account enumeration attacks, `POST /api/auth/login` emits the exact same 401 error message (`{"error": "Invalid email or password"}`) whether the email does not exist or the password is incorrect.
   - *Rate Limiting:* Failed login attempts trigger automatic rate-limiting (`429 Too Many Requests`) after 5 failed tries within 5 minutes.
 
